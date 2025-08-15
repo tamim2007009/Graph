@@ -1,89 +1,76 @@
-#include<bits/stdc++.h>
+#include <iostream>
+#include <queue>
+#include <utility>
+#include <vector>
+
+
 using namespace std;
 
-// A* Search without custom comparator
-void aStarSearch(int start, int goal, vector<vector<pair<int, int>>>& adj, vector<int>& heuristic) {
-    int n = adj.size();
-    vector<int> g(n, INT_MAX);       // cost from start to node
-    vector<int> f(n, INT_MAX);       // estimated total cost (f = g + h)
-    vector<bool> visited(n, false);
-    vector<int> parent(n, -1);
+void aStarSearch(int start, int goal, vector<vector<pair<int, int>>> &adj,
+                 vector<int> &heuristic) {
+  int n = adj.size();
+  vector<bool> visited(n, false);
+  vector<int> g(n, 1e9); // cost from start to node
+  priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>>
+      pq; // {f = g + h, node}
 
-    g[start] = 0;
-    f[start] = heuristic[start];
+  g[start] = 0;
+  pq.push({heuristic[start], start});
 
-    vector<int> open = {start};  // open list
+  cout << "Path: ";
 
-    while (!open.empty()) {
-        // Find node with lowest f-cost
-        int current = open[0];
-        for (int node : open) {
-            if (f[node] < f[current])
-                current = node;
-        }
+  while (!pq.empty()) {
+    int current = pq.top().second;
+    pq.pop();
 
-        if (current == goal) {
-            // Reconstruct path
-            vector<int> path;
-            while (current != -1) {
-                path.push_back(current);
-                current = parent[current];
-            }
-            cout << "Path: ";
-            for (int i = path.size() - 1; i >= 0; --i)
-                cout << path[i] << " ";
-            cout << "\nTotal Cost: " << g[goal] << endl;
-            return;
-        }
+    if (visited[current])
+      continue;
 
-        // Remove current from open list
-        open.erase(remove(open.begin(), open.end(), current), open.end());
-        visited[current] = true;
+    visited[current] = true;
+    cout << current << " ";
 
-        for (auto& neighbor : adj[current]) {
-            int next = neighbor.first;
-            int cost = neighbor.second;
-
-            if (visited[next]) continue;
-
-            int tentative_g = g[current] + cost;
-
-            if (tentative_g < g[next]) {
-                g[next] = tentative_g;
-                f[next] = g[next] + heuristic[next];
-                parent[next] = current;
-
-                // Add to open list if not already present
-                if (find(open.begin(), open.end(), next) == open.end())
-                    open.push_back(next);
-            }
-        }
+    if (current == goal) {
+      cout << "\nGoal reached!" << endl;
+      return;
     }
 
-    cout << "Path not found.\n";
+    for (auto &neighbor : adj[current]) {
+      int next = neighbor.first;
+      int cost = neighbor.second;
+
+      if (!visited[next]) {
+        int new_g = g[current] + cost;
+        if (new_g < g[next]) {
+          g[next] = new_g;
+          int f = new_g + heuristic[next];
+          pq.push({f, next});
+        }
+      }
+    }
+  }
+
+  cout << "\nGoal not reachable." << endl;
 }
 
 int main() {
-    int n = 6;
-    vector<vector<pair<int, int>>> adj(n);
+  int n = 6;
 
-    // Example edges: (u, v, cost)
-    adj[0].push_back({1, 2});
-    adj[0].push_back({2, 4});
-    adj[1].push_back({2, 1});
-    adj[1].push_back({3, 7});
-    adj[2].push_back({4, 3});
-    adj[4].push_back({3, 2});
-    adj[3].push_back({5, 1});
-    adj[4].push_back({5, 5});
+  // Adjacency list: (neighbor, cost)
+  vector<vector<pair<int, int>>> adj(n);
+  adj[0] = {{1, 1}, {2, 1}};
+  adj[1] = {{0, 1}, {3, 1}, {4, 1}};
+  adj[2] = {{0, 1}, {5, 1}};
+  adj[3] = {{1, 1}};
+  adj[4] = {{1, 1}};
+  adj[5] = {{2, 1}};
 
-    // Heuristic values (estimated cost to goal node 5)
-    vector<int> heuristic = {10, 8, 5, 3, 1, 0};
+  // Heuristic values
+  vector<int> heuristic = {7, 6, 2, 1, 0, 3};
 
-    int start = 0;
-    int goal = 5;
+  int start = 0;
+  int goal = 4;
 
-    aStarSearch(start, goal, adj, heuristic);
+  aStarSearch(start, goal, adj, heuristic);
 
-    return 0;
+  return 0;
 }
