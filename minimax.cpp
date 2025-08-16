@@ -1,25 +1,22 @@
-#include<bits/stdc++.h>
+#include <bits/stdc++.h>
 using namespace std;
 
 class Node {
 public:
-    int value;              // Utility value if it's a leaf node
-    vector<Node> children;  // Possible moves from this state
+    int value;              
+    vector<Node> children;  
 
-    // Constructor for leaf nodes
-    Node(int val){
-        value=val;
+    Node(int val) { // Leaf node
+        value = val;
     }
 
-    // Constructor for internal nodes
-    Node(int val, vector<Node> childs) {
-        value=val;
-        children=childs;
+    Node(int val, vector<Node> childs) { // Internal node
+        value = val;
+        children = childs;
     }
 };
 
 int minimax(const Node& node, int depth, bool maximizingPlayer) {
-    // Base case: leaf node or depth limit reached
     if (depth == 0 || node.children.empty()) {
         return node.value;
     }
@@ -31,8 +28,7 @@ int minimax(const Node& node, int depth, bool maximizingPlayer) {
             maxEval = max(maxEval, eval);
         }
         return maxEval;
-    } 
-    else { // Minimizing player
+    } else {
         int minEval = INT_MAX;
         for (const auto& child : node.children) {
             int eval = minimax(child, depth - 1, true);
@@ -43,27 +39,29 @@ int minimax(const Node& node, int depth, bool maximizingPlayer) {
 }
 
 int main() {
-    // Creating the game tree:
-    //         ROOT
-    //        /    \
-    //      A        B
-    //     / \      / \
-    //    3   5    2   9
-    Node leaf1(3);
-    Node leaf2(5);
-    Node leaf3(2);
-    Node leaf4(9);
-    Node x(4);
+    // Leaves
+    Node d1(-1), d2(8);
+    Node e1(-3),e2(-1);
+    Node f1(2), f2(1);
+    Node g1(-3), g2(4);
 
-    Node nodeA(0, {leaf1, leaf2});
-    Node nodeB(0, {leaf3, leaf4});
+    // Internal nodes
+    Node D(0, {d1, d2});
+    Node E(0, {e1,e2});
+    Node F(0, {f1, f2});
+    Node G(0, {g1, g2});
 
-    Node root(0, {nodeA, nodeB});
+    // Level B and C
+    Node B(0, {D, E});
+    Node C(0, {F, G});
 
-    // Find the optimal value starting from the root as the maximizing player
-    int optimalValue = minimax(root, 2, true);
+    // Root A
+    Node A(0, {B, C});
 
-    cout << "Optimal value: " << optimalValue << endl; // Should output 5
+    // Depth of the tree is 3
+    int optimalValue = minimax(A, 3, true);
+
+    cout << "Optimal value at root (A): " << optimalValue << endl;
 
     return 0;
 }
